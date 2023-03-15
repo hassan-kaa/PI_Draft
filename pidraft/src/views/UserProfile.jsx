@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import FileSaver from "file-saver";
 import {
   MDBCol,
   MDBContainer,
@@ -8,11 +9,21 @@ import {
   MDBCardBody,
   MDBCardImage,
   MDBBtn,
+  MDBInput,
 } from "mdb-react-ui-kit";
+import PdfDocument from "../components/PdfDocument";
+import { useNavigate } from "react-router-dom";
+//import { PDFViewer } from "@react-pdf/renderer";
 
 export default function UserProfile() {
+  const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [email, setEmail] = useState("");
+  const [numero, setNumero] = useState("");
+  const [edit, setEdit] = useState(false);
   const [user, setUser] = useState(null);
   const jwtToken = localStorage.getItem("token");
+  const navigate = useNavigate();
   const getUserInfo = async () => {
     try {
       const response = await fetch("http://localhost:5000/user/login", {
@@ -24,12 +35,32 @@ export default function UserProfile() {
       });
       const data = await response.json();
       setUser(data);
-      //   const token = response.data.token;
-      //   localStorage.setItem("token", token);
-      //   window.location.href = "/userprofile";
     } catch (error) {
       console.log("error  " + error);
     }
+  };
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
+  const handleEditSubmit = async () => {
+    await fetch("http://localhost:5000/user/login", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: user,
+    });
+    setEdit(false);
+    navigate("/");
+  };
+  const downloadPDF = async () => {
+    var blob = new Blob([<PdfDocument user={user} />], {
+      type: "application/pdf",
+    });
+    FileSaver.saveAs(blob, `${user.nom}Record.pdf`);
   };
   useEffect(() => {
     getUserInfo();
@@ -52,11 +83,20 @@ export default function UserProfile() {
                   {user && user.nom + " " + user.prenom}
                 </h4>
                 <div className="d-flex justify-content-center mb-2">
-                  <MDBBtn>Edit</MDBBtn>
-                  <MDBBtn outline className="ms-1">
+                  <MDBBtn
+                    onClick={() => {
+                      setEdit(true);
+                    }}
+                  >
+                    Edit
+                  </MDBBtn>
+                  <MDBBtn outline onClick={downloadPDF} className="ms-1">
                     My record
                   </MDBBtn>
                 </div>
+                <MDBBtn className="btn-danger" onClick={handleLogout}>
+                  Logout
+                </MDBBtn>
               </MDBCardBody>
             </MDBCard>
           </MDBCol>
@@ -68,9 +108,23 @@ export default function UserProfile() {
                     <MDBCardText>Nom</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="9">
-                    <MDBCardText className="text-muted">
-                      {user && user.nom}
-                    </MDBCardText>
+                    {edit ? (
+                      <MDBInput
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setNom(e.target.value);
+                        }}
+                        wrapperClass="mb-4"
+                        label="Nom"
+                        id="form1"
+                        type="text"
+                        placeholder={user.nom}
+                      />
+                    ) : (
+                      <MDBCardText className="text-muted">
+                        {user && user.nom}
+                      </MDBCardText>
+                    )}
                   </MDBCol>
                 </MDBRow>
                 <hr />
@@ -79,9 +133,23 @@ export default function UserProfile() {
                     <MDBCardText>Prenom</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="9">
-                    <MDBCardText className="text-muted">
-                      {user && user.prenom}
-                    </MDBCardText>
+                    {edit ? (
+                      <MDBInput
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setPrenom(e.target.value);
+                        }}
+                        wrapperClass="mb-4"
+                        label="Prenom"
+                        id="form1"
+                        type="text"
+                        placeholder={user.prenom}
+                      />
+                    ) : (
+                      <MDBCardText className="text-muted">
+                        {user && user.prenom}
+                      </MDBCardText>
+                    )}
                   </MDBCol>
                 </MDBRow>
                 <hr />
@@ -90,9 +158,23 @@ export default function UserProfile() {
                     <MDBCardText>Email</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="9">
-                    <MDBCardText className="text-muted">
-                      {user && user.email}
-                    </MDBCardText>
+                    {edit ? (
+                      <MDBInput
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setEmail(e.target.value);
+                        }}
+                        wrapperClass="mb-4"
+                        label="Email address"
+                        id="form1"
+                        type="email"
+                        placeholder={user.email}
+                      />
+                    ) : (
+                      <MDBCardText className="text-muted">
+                        {user && user.email}
+                      </MDBCardText>
+                    )}
                   </MDBCol>
                 </MDBRow>
                 <hr />
@@ -101,27 +183,49 @@ export default function UserProfile() {
                     <MDBCardText>Phone</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="9">
-                    <MDBCardText className="text-muted">
-                      {user && user.numero}
-                    </MDBCardText>
+                    {edit ? (
+                      <MDBInput
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setNumero(e.target.value);
+                        }}
+                        wrapperClass="mb-4"
+                        label="Phone number"
+                        id="form1"
+                        type="number"
+                        placeholder={user.numero}
+                      />
+                    ) : (
+                      <MDBCardText className="text-muted">
+                        {user && user.numero}
+                      </MDBCardText>
+                    )}
                   </MDBCol>
                 </MDBRow>
-                <hr />
-                <MDBRow>
-                  <MDBCol sm="3">
-                    <MDBCardText>Address</MDBCardText>
-                  </MDBCol>
-                  <MDBCol sm="9">
-                    <MDBCardText className="text-muted">
-                      {user && user.adresse}
-                    </MDBCardText>
-                  </MDBCol>
-                </MDBRow>
+                {edit ? (
+                  <div className="d-flex justify-content-center mb-2">
+                    <MDBBtn onClick={handleEditSubmit}>Save</MDBBtn>
+                    <MDBBtn
+                      outline
+                      onClick={() => {
+                        setEdit(false);
+                      }}
+                      className="ms-1"
+                    >
+                      Cancel
+                    </MDBBtn>
+                  </div>
+                ) : (
+                  ""
+                )}
               </MDBCardBody>
             </MDBCard>
           </MDBCol>
         </MDBRow>
       </MDBContainer>
+      {/* <PDFViewer>
+        <PdfDocument user={user} />
+      </PDFViewer> */}
     </section>
   );
 }

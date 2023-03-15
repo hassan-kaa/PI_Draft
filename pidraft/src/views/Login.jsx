@@ -22,14 +22,14 @@ function Login() {
         }),
       });
       const data = await response.json();
-      console.log(data);
-      if (data.token) {
+      if (response.ok) {
         localStorage.setItem("token", data.token);
         navigate("/userprofile");
-      } else console.log("could not connect");
+      } else {
+        setError(data);
+      }
     } catch (error) {
-      console.log(error);
-      setError("Invalid email or password");
+      setError(error.message);
     }
   };
 
@@ -69,7 +69,11 @@ function Login() {
       <MDBBtn onClick={handleLogin} className="mb-4">
         Sign in
       </MDBBtn>
-
+      {error && (
+        <div className="text-center text-danger">
+          <p>{error}</p>
+        </div>
+      )}
       <div className="text-center">
         <p>
           Not a member? <a href="/register">Register</a>

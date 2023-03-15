@@ -1,9 +1,11 @@
 const router = require('express').Router()
 const userController = require('../controllers/userController')
-
-router.get("/getAll",userController.getAllUsers  )
-router.post("/register",userController.addUser)
+const requireAuth = require("../middleware/requireAuth") 
+router.post("/register",userController.signUpUser)
 router.post("/login",userController.loginUser);
-  // Protected route
-router.get('/login', userController.authenticateToken);
+// Protected route
+router.use(requireAuth)
+router.get('/login', userController.getUser);
+router.put('/login', userController.editUser);
+
 module.exports = router ; 

@@ -6,7 +6,7 @@ const userSchema = new Schema(
   {
     nom: { type: String, required: true },
    prenom:{type:String,required:true},
-   email:{type:String,required:true},
+   email:{type:String,required:true,unique:true},
    numero:{type:Number,required:true},
    password:{type:String,required:true},
    role:{type:String,required:false},
@@ -14,32 +14,30 @@ const userSchema = new Schema(
   { timestamps: false }
 );
 
-userSchema.pre('save', function (next) {
-    const user = this;
-    if (!user.isModified('password')) {
-      return next();
-    }
-    bcrypt.genSalt(10, function (err, salt) {
-      if (err) {
-        return next(err);
-      }
-      bcrypt.hash(user.password, salt, function (err, hash) {
-        if (err) {
-          return next(err);
-        }
-        user.password = hash;
-        next();
-      });
-    });
-  });
-  
-  userSchema.methods.comparePassword = function (candidatePassword, callback) {
-    bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
-      if (err) {
-        return callback(err);
-      }
-      callback(null, isMatch);
-    });
-  };
+//Sign up static method
+userSchema.statics.signUp = async function(reqBody){
+  const emailExists= await this.findOne({"email":reqBody.email})
+  if(emailExists)
+  throw(Error("Email already exists !"))
+  const salt = await bcrypt.genSalt(10)
+  const hash = await bcrypt.hash(reqBody.password,salt)
+  reqBody.password = hash;
+  const user = this.create(reqBody)
+  return user ;
+}
+
+//Login static method 
+userSchema.statics.login = async function(reqBody){
+      
+      // Check if user exists
+      const user = await this.findOne({"email": reqBody.email });
+      if (!user) throw(Error("user does not exist" ))
+
+      // Compare the password
+      const passwordMatch = await bcrypt.compare(reqBody.password, user.password);
+      if (!passwordMatch) throw(Error("Incorrect Password"))
+  return user ;
+}
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;

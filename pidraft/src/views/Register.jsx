@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   MDBBtn,
   MDBContainer,
@@ -10,7 +10,7 @@ import {
   MDBInput,
   MDBCheckbox,
 } from "mdb-react-ui-kit";
-import { redirect, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
   const [nom, setNom] = useState("");
@@ -19,6 +19,9 @@ function Register() {
   const [numero, setNumero] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const form = useRef();
   const handleSubmit = async (e) => {
     e.preventDefault();
     const response = await fetch("http://localhost:5000/user/register", {
@@ -36,14 +39,18 @@ function Register() {
       }),
     });
     const data = await response.json();
-    console.log(data);
-    redirect("/");
+    if (response.ok) {
+      navigate("/");
+    } else {
+      //form.reset();
+      setError(data);
+    }
   };
   return (
     <MDBContainer fluid>
       <MDBCard className="text-black m-5" style={{ borderRadius: "25px" }}>
         <MDBCardBody>
-          <form onSubmit={handleSubmit}>
+          <form ref={form} onSubmit={handleSubmit}>
             <MDBRow>
               <MDBCol
                 md="10"
@@ -152,6 +159,11 @@ function Register() {
                 <MDBBtn type="submit" className="mb-4" size="lg">
                   Register
                 </MDBBtn>
+                {error && (
+                  <div className="text-center text-danger">
+                    <p>{error}</p>
+                  </div>
+                )}
                 <div className="text-center">
                   <p>
                     Already have an account? <a href="/">Login</a>
