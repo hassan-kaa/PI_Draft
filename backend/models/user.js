@@ -9,7 +9,7 @@ const userSchema = new Schema(
    email:{type:String,required:true,unique:true},
    numero:{type:Number,required:true},
    password:{type:String,required:true},
-   role:{type:String,required:false},
+   role:{type:String,required:false,default:"Patient"},
   },
   { timestamps: false }
 );

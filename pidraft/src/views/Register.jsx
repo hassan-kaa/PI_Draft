@@ -9,6 +9,7 @@ import {
   MDBCardImage,
   MDBInput,
   MDBCheckbox,
+  MDBSwitch,
 } from "mdb-react-ui-kit";
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +17,8 @@ function Register() {
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
   const [email, setEmail] = useState("");
-  const [numero, setNumero] = useState("");
+  const [numero, setNumero] = useState(0);
+  const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
@@ -35,6 +37,7 @@ function Register() {
         numero,
         email,
         password,
+        role,
         passwordConfirm,
       }),
     });
@@ -116,6 +119,19 @@ function Register() {
                           setNumero(e.target.value);
                         }}
                       />
+                      <select
+                        label="Role"
+                        id="phone"
+                        type="text"
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setRole(e.target.value);
+                        }}
+                      >
+                        <option value="Docteur">Docteur</option>
+                        <option value="Patient">Patient</option>
+                        <option value="Pharmacien">Pharmacien</option>
+                      </select>
                     </div>
                   </MDBCol>
                 </MDBRow>
